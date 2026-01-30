@@ -1,5 +1,6 @@
 package uk.ac.ed.inf.acpTutorial.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -66,6 +67,25 @@ public class DynamoDbController {
                 java.util.Map.of("key", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(key).build(),
                         "content", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(objectContent).build())
         ));
+    }
+
+    @GetMapping("/primary-key/{table}")
+    public String getTablePrimaryKey(
+            @Parameter(name = "table", description = "The name of the DynamoDB table")
+            @PathVariable(required = true)
+            String table) {
+
+        DescribeTableRequest request = DescribeTableRequest.builder()
+                .tableName(table)
+                .build();
+
+        DescribeTableResponse response = getDynamoDbClient().describeTable(request);
+
+        return response.table().keySchema().stream()
+                .filter(k -> k.keyType().toString().equals("HASH"))
+                .map(KeySchemaElement::attributeName)
+                .findFirst()
+                .orElseThrow();
     }
 
     private DynamoDbClient getDynamoDbClient() {

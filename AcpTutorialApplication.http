@@ -65,12 +65,16 @@ GET http://localhost:8080/api/v1/acp/dynamo/tables
 
 
 ###
-PUT http://localhost:8080/api/v1/acp/dynamo/create-table/my-table
+PUT http://localhost:8080/api/v1/acp/dynamo/create-table/abc
 Content-Type: application/x-www-form-urlencoded
 
 <> 2026-01-28T213416.500.json
 ###
 GET http://localhost:8080/api/v1/acp/dynamo/list-objects/my-table
+
+<> 2026-01-28T213416.500.json
+###
+GET http://localhost:8080/api/v1/acp/dynamo/primary-key/abc
 
 
 ###

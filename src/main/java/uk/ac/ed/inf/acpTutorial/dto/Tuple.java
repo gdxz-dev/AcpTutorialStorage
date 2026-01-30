@@ -7,6 +7,8 @@ public class Tuple {
     private String item1;
     private String item2;
 
+    private Integer myInt;
+
     public Tuple(){
 
     }
