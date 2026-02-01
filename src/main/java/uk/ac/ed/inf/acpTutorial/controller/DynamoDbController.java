@@ -1,16 +1,13 @@
 package uk.ac.ed.inf.acpTutorial.controller;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jdk.jfr.ContentType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 import uk.ac.ed.inf.acpTutorial.configuration.DynamoDbConfiguration;
-import uk.ac.ed.inf.acpTutorial.configuration.SystemEnvironment;
-
-import java.net.URI;
+import uk.ac.ed.inf.acpTutorial.service.DynamoDbService;
 import java.util.List;
 
 @RestController()
@@ -19,8 +16,7 @@ import java.util.List;
 public class DynamoDbController {
 
     private final DynamoDbConfiguration dynamoDbConfiguration;
-    private final SystemEnvironment systemEnvironment;
-    private static final String KEY_COLUMN_NAME = "key";
+    private final DynamoDbService dynamoDbService;
 
     @GetMapping("/endpoint")
     public String getDynamoDbEndpoint () {
@@ -29,44 +25,22 @@ public class DynamoDbController {
 
     @GetMapping("/tables")
     public List<String> listTables() {
-        return getDynamoDbClient().listTables().tableNames();
+        return dynamoDbService.listTables();
     }
 
-    @GetMapping("/list-objects/{table}")
-    public List<String> listTableObjects(@PathVariable String table) {
-        return getDynamoDbClient()
-                .scanPaginator(b -> b.tableName(table))
-                .stream()
-                .flatMap(r -> r.items().stream())
-                .flatMap(i -> i.keySet().stream())
-                .distinct()
-                .toList();
+    @GetMapping(path = "/list-objects/{table}", produces = "application/json")
+    public ResponseEntity<String> listTableObjects(@PathVariable String table) {
+        return ResponseEntity.ok("[" + String.join(", " , dynamoDbService.listTableObjects(table)) + "]");
     }
 
     @PutMapping("/create-table/{table}")
     public void createTable(@PathVariable String table) {
-        getDynamoDbClient().createTable(b -> b.tableName(table)
-                .attributeDefinitions(AttributeDefinition.builder()
-                        .attributeName(KEY_COLUMN_NAME)
-                        .attributeType(ScalarAttributeType.S)
-                        .build())
-                .keySchema(KeySchemaElement.builder()
-                        .attributeName(KEY_COLUMN_NAME)
-                        .keyType(KeyType.HASH)
-                        .build())
-                .provisionedThroughput(ProvisionedThroughput.builder()
-                        .readCapacityUnits(5L)
-                        .writeCapacityUnits(5L)
-                        .build())
-        );
+        dynamoDbService.createTable(table);
     }
 
     @PutMapping("/create-object/{table}/{key}")
     public void createObject(@PathVariable String table, @PathVariable String key, @RequestBody String objectContent) {
-        getDynamoDbClient().putItem(b -> b.tableName(table).item(
-                java.util.Map.of("key", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(key).build(),
-                        "content", software.amazon.awssdk.services.dynamodb.model.AttributeValue.builder().s(objectContent).build())
-        ));
+        dynamoDbService.createObject(table, key, objectContent);
     }
 
     @GetMapping("/primary-key/{table}")
@@ -75,24 +49,6 @@ public class DynamoDbController {
             @PathVariable(required = true)
             String table) {
 
-        DescribeTableRequest request = DescribeTableRequest.builder()
-                .tableName(table)
-                .build();
-
-        DescribeTableResponse response = getDynamoDbClient().describeTable(request);
-
-        return response.table().keySchema().stream()
-                .filter(k -> k.keyType().toString().equals("HASH"))
-                .map(KeySchemaElement::attributeName)
-                .findFirst()
-                .orElseThrow();
-    }
-
-    private DynamoDbClient getDynamoDbClient() {
-        return DynamoDbClient.builder()
-                .endpointOverride(URI.create(dynamoDbConfiguration.getDynamoDbEndpoint()))
-                .region(systemEnvironment.getAwsRegion())
-                .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(systemEnvironment.getAwsUser(), systemEnvironment.getAwsSecret())))
-                .build();
+        return dynamoDbService.getTablePrimaryKey(table);
     }
 }

@@ -70,7 +70,7 @@ Content-Type: application/x-www-form-urlencoded
 
 <> 2026-01-28T213416.500.json
 ###
-GET http://localhost:8080/api/v1/acp/dynamo/list-objects/my-table
+GET http://localhost:8080/api/v1/acp/dynamo/list-objects/abc
 
 <> 2026-01-28T213416.500.json
 ###
@@ -78,7 +78,7 @@ GET http://localhost:8080/api/v1/acp/dynamo/primary-key/abc
 
 
 ###
-PUT http://localhost:8080/api/v1/acp/dynamo/create-object/my-table/key-1234
+PUT http://localhost:8080/api/v1/acp/dynamo/create-object/abc/key-5678
 Content-Type: text/plain
 
 This is the content of my-object.txt
