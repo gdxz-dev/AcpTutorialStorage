@@ -69,4 +69,8 @@ public class PostgresService {
         return droneRepository.save(createDrone).getId();
     }
 
+    @Transactional
+    public void deleteDrone(String droneId) {
+        droneRepository.deleteById(droneId);
+    }
 }

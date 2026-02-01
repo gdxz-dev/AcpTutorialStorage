@@ -36,14 +36,20 @@ public class PostgresController {
         return postgresService.getAllDrones();
     }
 
-    @PostMapping("/drones-jdbc")
+    @PutMapping("/drones-jdbc")
     public ResponseEntity<String> createDroneUsingJdpc(@RequestBody Drone drone) {
         return ResponseEntity.ok(postgresService.createDroneUsingJdbc(drone));
     }
 
-    @PostMapping("/drones-jpa")
+    @PutMapping("/drones-jpa")
     public ResponseEntity<String> createDroneUsingJpa(@RequestBody Drone drone) {
         return ResponseEntity.ok(postgresService.createDroneUsingJpa(drone));
+    }
+
+    @DeleteMapping("/drones/{droneId}")
+    public ResponseEntity<Void> deleteDrone(@PathVariable String droneId) {
+        postgresService.deleteDrone(droneId);
+        return ResponseEntity.ok().build();
     }
 
 
