@@ -2,6 +2,29 @@ spring:
   application:
     name: AcpTutorial
 
+  datasource:
+    url: "${acp.postgres-endpoint:jdbc:postgresql://localhost:5432/postgres}"
+    username: "${POSTGRES_USER:postgres}"
+    password: "${POSTGRES_PASSWORD:postgres}"
+    driver-class-name: org.postgresql.Driver
+    # HikariCP tuning (optional)
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+  jpa:
+    hibernate:
+      ddl-auto: none   # use Liquibase for schema management; change to 'update' only for development if desired
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yml
+
 info:
   app:
     name: AcpTutorial
@@ -41,3 +64,4 @@ acp:
   s3-endpoint: http://s3.localhost.localstack.cloud:4566
   s3-bucket: acp
   dynamodb-endpoint: http://dynamodb.localhost.localstack.cloud:4566
+  postgres-endpoint: jdbc:postgresql://localhost:5432/postgres

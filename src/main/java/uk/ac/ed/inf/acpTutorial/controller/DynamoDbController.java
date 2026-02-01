@@ -20,7 +20,7 @@ public class DynamoDbController {
 
     private final DynamoDbConfiguration dynamoDbConfiguration;
     private final SystemEnvironment systemEnvironment;
-
+    private static final String KEY_COLUMN_NAME = "key";
 
     @GetMapping("/endpoint")
     public String getDynamoDbEndpoint () {
@@ -47,11 +47,11 @@ public class DynamoDbController {
     public void createTable(@PathVariable String table) {
         getDynamoDbClient().createTable(b -> b.tableName(table)
                 .attributeDefinitions(AttributeDefinition.builder()
-                        .attributeName("key")
+                        .attributeName(KEY_COLUMN_NAME)
                         .attributeType(ScalarAttributeType.S)
                         .build())
                 .keySchema(KeySchemaElement.builder()
-                        .attributeName("key")
+                        .attributeName(KEY_COLUMN_NAME)
                         .keyType(KeyType.HASH)
                         .build())
                 .provisionedThroughput(ProvisionedThroughput.builder()

@@ -24,6 +24,6 @@ public class Tuple {
      */
     @Override
     public String toString() {
-        return "item1: " + getItem1() + " -- item2: " + getItem2();
+        return "item1: " + this.item1 + " -- item2: " + this.item2;
     }
 }
